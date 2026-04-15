@@ -1,0 +1,63 @@
+from abc import ABC, abstractmethod
+
+class Printable(ABC):
+    @abstractmethod
+    def print(self, text: str) -> None:
+        pass
+
+class Scannable(ABC):
+    @abstractmethod
+    def scan(self) -> str:
+        pass
+
+class Faxable(ABC):
+    @abstractmethod
+    def fax(self, number: str) -> None:
+        pass
+
+class Copiable(ABC):
+    @abstractmethod
+    def copy(self) -> None:
+        pass
+
+class SimplePrinter(Printable):
+    def print(self, text: str) -> None:
+        print(f"Печатаю: {text}")
+
+class ScannerDevice(Scannable):
+    def scan(self) -> str:
+        return
+
+class FaxMachine(Faxable):
+    def fax(self, number: str) -> None:
+        print(f"Отправляю факс на номер {number}")
+
+class CopierDevice(Copiable):
+    def copy(self) -> None:
+        print("Выполняю копирование")
+
+class MultifunctionDevice(Printable, Scannable, Faxable, Copiable):
+    def print(self, text: str) -> None:
+        print(f"Многофункциональное устройство печатает: {text}")
+
+    def scan(self) -> str:
+        return
+
+    def fax(self, number: str) -> None:
+        print(f"Многофункциональное устройство отправляет факс на {number}")
+
+    def copy(self) -> None:
+        print("Многофункциональное устройство копирует")
+
+def use_printer(printer: Printable) -> None:
+    printer.print("Привет, мир!")
+
+def use_scanner(scanner: Scannable) -> None:
+    result = scanner.scan()
+    print(f"Результат сканирования: {result}")
+
+def use_fax(fax_machine: Faxable) -> None:
+    fax_machine.fax("+7-906-123-45-67")
+
+def use_copier(copier: Copiable) -> None:
+    copier.copy()
