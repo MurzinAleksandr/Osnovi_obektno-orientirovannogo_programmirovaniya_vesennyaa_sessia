@@ -1,0 +1,68 @@
+from abc import ABC, abstractmethod
+import json
+import csv
+import io
+import xml.etree.ElementTree as ET
+
+class Parser(ABC):
+    @abstractmethod
+    def parse(self, raw: str) -> list[dict]:
+        pass
+
+class JsonParser(Parser):
+    def parse(self, raw: str) -> list[dict]:
+        return json.loads(raw)
+
+class CsvParser(Parser):
+    def parse(self, raw: str) -> list[dict]:
+        return list(csv.DictReader(io.StringIO(raw)))
+
+class XmlParser(Parser):
+    def parse(self, raw: str) -> list[dict]:
+        root = ET.fromstring(raw)
+        result = []
+        for item in root:
+            record = {}
+            for child in item:
+                record[child.tag] = child.text
+            result.append(record)
+        return result
+
+class DataImporter(ABC):
+    @abstractmethod
+    def create_parser(self) -> Parser:
+        pass
+
+    def import_data(self, raw_data: str) -> list[dict]:
+        parser = self.create_parser()
+        return parser.parse(raw_data)
+
+class JsonImporter(DataImporter):
+    def create_parser(self) -> Parser:
+        return JsonParser()
+
+class CsvImporter(DataImporter):
+    def create_parser(self) -> Parser:
+        return CsvParser()
+
+class XmlImporter(DataImporter):
+    def create_parser(self) -> Parser:
+        return XmlParser()
+
+if __name__ == "__main__":
+    json_data = '[{"name": "Анна", "age": 30}, {"name": "Иван", "age": 25}]'
+    csv_data = 'name,age\nАнна,30\nИван,25'
+    xml_data = '<data><person><name>Анна</name><age>30</age></person><person><name>Иван</name><age>25</age></person></data>'
+
+    json_importer = JsonImporter()
+    csv_importer = CsvImporter()
+    xml_importer = XmlImporter()
+
+    print("JSON импорт:")
+    print(json_importer.import_data(json_data))
+
+    print("\nCSV импорт:")
+    print(csv_importer.import_data(csv_data))
+
+    print("\nXML импорт:")
+    print(xml_importer.import_data(xml_data))
