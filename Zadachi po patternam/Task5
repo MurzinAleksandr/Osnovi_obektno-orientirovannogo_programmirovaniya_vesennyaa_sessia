@@ -1,0 +1,96 @@
+from abc import ABC, abstractmethod
+
+class UIFactory(ABC):
+    @abstractmethod
+    def create_button(self):
+        pass
+
+    @abstractmethod
+    def create_checkbox(self):
+        pass
+
+    @abstractmethod
+    def create_input(self):
+        pass
+
+class Button(ABC):
+    @abstractmethod
+    def render(self) -> str:
+        pass
+
+class Checkbox(ABC):
+    @abstractmethod
+    def render(self) -> str:
+        pass
+
+class Input(ABC):
+    @abstractmethod
+    def render(self) -> str:
+        pass
+
+class LightButton(Button):
+    def render(self) -> str:
+        return "[Light Button]"
+
+class LightCheckbox(Checkbox):
+    def render(self) -> str:
+        return "[Light Checkbox]"
+
+class LightInput(Input):
+    def render(self) -> str:
+        return "[Light Input]"
+
+class DarkButton(Button):
+    def render(self) -> str:
+        return "[Dark Button]"
+
+class DarkCheckbox(Checkbox):
+    def render(self) -> str:
+        return "[Dark Checkbox]"
+
+class DarkInput(Input):
+    def render(self) -> str:
+        return "[Dark Input]"
+
+class LightThemeFactory(UIFactory):
+    def create_button(self):
+        return LightButton()
+
+    def create_checkbox(self):
+        return LightCheckbox()
+
+    def create_input(self):
+        return LightInput()
+
+class DarkThemeFactory(UIFactory):
+    def create_button(self):
+        return DarkButton()
+
+    def create_checkbox(self):
+        return DarkCheckbox()
+
+    def create_input(self):
+        return DarkInput()
+
+class Application:
+    def __init__(self, factory: UIFactory):
+        self.factory = factory
+
+    def render_ui(self):
+        btn = self.factory.create_button()
+        chk = self.factory.create_checkbox()
+        inp = self.factory.create_input()
+
+        print(btn.render(), chk.render(), inp.render())
+
+if __name__ == "__main__":
+    light_factory = LightThemeFactory()
+    dark_factory = DarkThemeFactory()
+
+    light_app = Application(light_factory)
+    print("Светлая тема:")
+    light_app.render_ui()
+
+    dark_app = Application(dark_factory)
+    print("Тёмная тема:")
+    dark_app.render_ui()
