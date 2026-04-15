@@ -1,0 +1,189 @@
+class Resume:
+    def __init__(self):
+        self.name = ""
+        self.email = ""
+        self.phone = ""
+        self.summary = ""
+        self.experience = []
+        self.education = []
+        self.skills = []
+        self.languages = []
+        self.certifications = []
+
+    def __str__(self) -> str:
+        return (
+            f"=== {self.name} ===\n"
+            f"Email: {self.email}\n"
+            f"Телефон: {self.phone}\n"
+            f"Резюме: {self.summary}\n"
+            f"Навыки: {', '.join(self.skills) if self.skills else 'не указаны'}\n"
+            f"Опыт: {len(self.experience)} позиций\n"
+            f"Образование: {len(self.education)} записей\n"
+            f"Языки: {', '.join(self.languages) if self.languages else 'не указаны'}\n"
+            f"Сертификаты: {', '.join(self.certifications) if self.certifications else 'не указаны'}"
+        )
+
+class ResumeBuilder:
+    def __init__(self):
+        self._resume = Resume()
+
+    def set_name(self, name: str):
+        self._resume.name = name
+        return self
+
+    def set_email(self, email: str):
+        self._resume.email = email
+        return self
+
+    def set_phone(self, phone: str):
+        self._resume.phone = phone
+        return self
+
+    def set_summary(self, summary: str):
+        self._resume.summary = summary
+        return self
+
+    def add_experience(self, company: str, position: str, years: int):
+        self._resume.experience.append({
+            "company": company,
+            "position": position,
+            "years": years
+        })
+        return self
+
+    def add_education(self, degree: str, school: str, year: int = None):
+        self._resume.education.append({
+            "degree": degree,
+            "school": school,
+            "year": year
+        })
+        return self
+
+    def add_skill(self, skill: str):
+        self._resume.skills.append(skill)
+        return self
+
+    def add_language(self, language: str):
+        self._resume.languages.append(language)
+        return self
+
+    def add_certification(self, certification: str):
+        self._resume.certifications.append(certification)
+        return self
+
+    def build(self) -> Resume:
+        return self._resume
+
+class Director:
+    @staticmethod
+    def build_basic_resume(builder: ResumeBuilder, name: str, email: str) -> Resume:
+        return builder.set_name(name).set_email(email).build()
+
+    @staticmethod
+    def build_standard_resume(
+        builder: ResumeBuilder,
+        name: str,
+        email: str,
+        phone: str = "",
+        skills: list[str] = None
+    ) -> Resume:
+        builder.set_name(name).set_email(email)
+        if phone:
+            builder.set_phone(phone)
+        if skills:
+            for skill in skills:
+                builder.add_skill(skill)
+        return builder.build()
+
+    @staticmethod
+    def build_advanced_resume(
+        builder: ResumeBuilder,
+        name: str,
+        email: str,
+        phone: str = "",
+        summary: str = "",
+        experience: list[tuple] = None,
+        education: list[tuple] = None,
+        skills: list[str] = None,
+        languages: list[str] = None,
+        certifications: list[str] = None
+    ) -> Resume:
+        builder.set_name(name).set_email(email)
+
+        if phone: builder.set_phone(phone)
+        if summary: builder.set_summary(summary)
+
+        if experience:
+            for company, position, years in experience:
+                builder.add_experience(company, position, years)
+
+        if education:
+            for degree, school, year in education:
+                builder.add_education(degree, school, year)
+
+        if skills:
+            for skill in skills:
+                builder.add_skill(skill)
+
+        if languages:
+            for language in languages:
+                builder.add_language(language)
+
+        if certifications:
+            for cert in certifications:
+                builder.add_certification(cert)
+
+        return builder.build()
+
+if __name__ == "__main__":
+    builder = ResumeBuilder()
+    resume1 = (builder
+               .set_name("Анна Иванова")
+               .set_email("anna@example.com")
+               .set_phone("+7-900-000-00-00")
+               .add_skill("Python")
+               .add_skill("SQL")
+               .add_skill("Docker")
+               .add_experience("Яндекс", "Разработчик", 3)
+               .add_education("Бакалавр", "МГУ", 2020)
+               .build())
+    print("=== ПОШАГОВОЕ СОЗДАНИЕ ===")
+    print(resume1)
+    print()
+
+    builder2 = ResumeBuilder()
+    resume2 = Director.build_standard_resume(
+        builder2,
+        "Иван Петров",
+        "ivan@example.com",
+        "+7-911-111-11-11",
+        ["Java", "Spring", "PostgreSQL"]
+    )
+    print("=== СТАНДАРТНОЕ РЕЗЮМЕ ЧЕРЕЗ DIRECTOR ===")
+    print(resume2)
+    print()
+
+    builder3 = ResumeBuilder()
+    experience_data = [
+        ("Яндекс", "Старший разработчик", 3),
+        ("Сбер", "Ведущий разработчик", 2)
+    ]
+    education_data = [
+        ("Магистр", "МГТУ им. Баумана", 2018),
+        ("Бакалавр", "МГТУ им. Баумана", 2016)
+    ]
+
+    resume3 = Director.build_advanced_resume(
+        builder3,
+        "Мария Сидорова",
+        "maria@example.com",
+        "+7-922-222-22-22",
+        "Опытный разработчик с 5-летним стажем",
+        experience_data,
+        education_data,
+        ["Python", "Django", "React", "AWS"],
+        ["Английский (B2)", "Немецкий (A2)"],
+        ["AWS Certified", "Google Cloud"]
+    )
+    print("=== РАСШИРЕННОЕ РЕЗЮМЕ ЧЕРЕЗ DIRECTOR ===")
+    print(resume3)
