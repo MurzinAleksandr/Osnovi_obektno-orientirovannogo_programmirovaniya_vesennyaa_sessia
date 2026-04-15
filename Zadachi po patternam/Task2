@@ -1,0 +1,45 @@
+from abc import ABC, abstractmethod
+
+class ReportManager(ABC):
+    @abstractmethod
+    def create_generator(self):
+        pass
+
+    def export(self, data: dict) -> str:
+        generator = self.create_generator()
+        return generator.generate(data)
+
+class PdfReport:
+    def generate(self, data: dict) -> str:
+        return f"[PDF] Отчёт: {data}"
+
+class ExcelReport:
+    def generate(self, data: dict) -> str:
+        return f"[Excel] Отчёт: {data}"
+
+class CsvReport:
+    def generate(self, data: dict) -> str:
+        return f"[CSV] Отчёт: {data}"
+
+class PdfReportManager(ReportManager):
+    def create_generator(self):
+        return PdfReport()
+
+class ExcelReportManager(ReportManager):
+    def create_generator(self):
+        return ExcelReport()
+
+class CsvReportManager(ReportManager):
+    def create_generator(self):
+        return CsvReport()
+
+if __name__ == "__main__":
+    pdf_manager = PdfReportManager()
+    excel_manager = ExcelReportManager()
+    csv_manager = CsvReportManager()
+
+    data = {"title": "Продажи Q1", "total": 150000}
+
+    print(pdf_manager.export(data))
+    print(excel_manager.export(data))
+    print(csv_manager.export(data))
