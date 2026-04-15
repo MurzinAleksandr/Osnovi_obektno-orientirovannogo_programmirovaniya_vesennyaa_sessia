@@ -1,0 +1,49 @@
+from dataclasses import dataclass
+from typing import Protocol
+
+class DiscountStrategy(Protocol):
+    def apply(self, total: float) -> float:
+        ...
+
+@dataclass
+class NoDiscount(DiscountStrategy):
+    def apply(self, total: float) -> float:
+        return total
+
+@dataclass
+class VIPDiscount(DiscountStrategy):
+    def apply(self, total: float) -> float:
+        return total * 0.9
+
+@dataclass
+class EmployeeDiscount(DiscountStrategy):
+    def apply(self, total: float) -> float:
+        return total * 0.8
+
+@dataclass
+class BlackFridayDiscount(DiscountStrategy):
+    def apply(self, total: float) -> float:
+        return total * 0.7
+
+@dataclass
+class Order:
+    total: float
+
+@dataclass
+class Customer:
+    kind: str  # "regular" | "vip" | "employee"
+
+class DiscountFactory:
+    _strategies = {
+        "regular": NoDiscount(),
+        "vip": VIPDiscount(),
+        "employee": EmployeeDiscount(),
+    }
+
+    @classmethod
+    def get_discount(cls, customer_kind: str) -> DiscountStrategy:
+        return cls._strategies.get(customer_kind, NoDiscount())
+
+def apply_discount(order: Order, customer: Customer) -> float:
+    strategy = DiscountFactory.get_discount(customer.kind)
+    return strategy.apply(order.total)
