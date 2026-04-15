@@ -1,0 +1,48 @@
+from abc import ABC, abstractmethod
+from typing import List
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self) -> float:
+        pass
+
+class Circle(Shape):
+    def __init__(self, radius: float):
+        self.radius = radius
+
+    def area(self) -> float:
+        return 3.14159 * self.radius ** 2
+
+class Rectangle(Shape):
+    def __init__(self, width: float, height: float):
+        self.width = width
+        self.height = height
+    def area(self) -> float:
+        return self.width * self.height
+
+class Triangle(Shape):
+    def __init__(self, base: float, height: float):
+        self.base = base
+        self.height = height
+    def area(self) -> float:
+        return 0.5 * self.base * self.height
+
+class AreaCalculator:
+    def calculate_total(self, shapes: List[Shape]) -> float:
+        total = 0.0
+        for shape in shapes:
+            total += shape.area()
+        return total
+
+if __name__ == "__main__":
+    circle = Circle(radius=5)
+    rectangle = Rectangle(width=4, height=6)
+    triangle = Triangle(base=3, height=4)
+
+    shapes = [circle, rectangle, triangle]
+    calc = AreaCalculator()
+    total_area = calc.calculate_total(shapes)
+
+    print(f"Общая площадь: {total_area:.2f}")
+    print(f"Площадь круга: {circle.area():.2f}")
+    print(f"Площадь треугольника: {triangle.area():.2f}")
