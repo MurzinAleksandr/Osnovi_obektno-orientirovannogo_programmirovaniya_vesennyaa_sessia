@@ -1,0 +1,82 @@
+from abc import ABC, abstractmethod
+
+class DatabaseConnection(ABC):
+    @abstractmethod
+    def connect(self) -> None:
+        pass
+
+    @abstractmethod
+    def query(self, sql: str) -> list:
+        pass
+
+    @abstractmethod
+    def disconnect(self) -> None:
+        pass
+
+class MySQLConnection(DatabaseConnection):
+    def connect(self) -> None:
+        print("Подключение к MySQL...")
+
+    def query(self, sql: str) -> list:
+        print(f"Выполнение запроса в MySQL: {sql}")
+        return [{"id": 1, "name": "Заказ 1"}, {"id": 2, "name": "Заказ 2"}]
+
+    def disconnect(self) -> None:
+        print("Отключение от MySQL")
+
+class PostgreSQLConnection(DatabaseConnection):
+    def connect(self) -> None:
+        print("Подключение к PostgreSQL...")
+
+    def query(self, sql: str) -> list:
+        print(f"Выполнение запроса в PostgreSQL: {sql}")
+        return [{"id": 3, "name": "Заказ 3"}, {"id": 4, "name": "Заказ 4"}]
+
+    class SQLiteConnection(DatabaseConnection):
+        def connect(self) -> None:
+            print("Подключение к SQLite...")
+
+        def query(self, sql: str) -> list:
+            print(f"Выполнение запроса в SQLite: {sql}")
+            return [{"id": 5, "name": "Заказ 5"}, {"id": 6, "name": "Заказ 6"}]
+
+        def disconnect(self) -> None:
+            print("Отключение от SQLite")
+
+class DatabaseFactory(ABC):
+    @abstractmethod
+    def create_connection(self) -> DatabaseConnection:
+        """Фабричный метод для создания подключения к БД."""
+        pass
+
+class MySQLFactory(DatabaseFactory):
+    def create_connection(self) -> DatabaseConnection:
+        return MySQLConnection()
+
+class PostgreSQLFactory(DatabaseFactory):
+    def create_connection(self) -> DatabaseConnection:
+        return PostgreSQLConnection()
+
+class SQLiteFactory(DatabaseFactory):
+    def create_connection(self) -> DatabaseConnection:
+        return SQLiteConnection()
+
+def run_report(factory: DatabaseFactory) -> list:
+    conn = factory.create_connection()
+    conn.connect()
+    results = conn.query("SELECT * FROM orders WHERE status = 'new'")
+    conn.disconnect()
+    return results
+
+if __name__ == "__main__":
+    mysql_factory = MySQLFactory()
+    mysql_results = run_report(mysql_factory)
+    print(f"Результаты из MySQL: {mysql_results}\n")
+
+    postgres_factory = PostgreSQLFactory()
+    postgres_results = run_report(postgres_factory)
+    print(f"Результаты из PostgreSQL: {postgres_results}\n")
+
+    sqlite_factory = SQLiteFactory()
+    sqlite_results = run_report(sqlite_factory)
+    print(f"Результаты из SQLite: {sqlite_results}")
