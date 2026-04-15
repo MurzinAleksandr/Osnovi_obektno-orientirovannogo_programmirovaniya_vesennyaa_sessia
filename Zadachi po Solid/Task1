@@ -1,0 +1,56 @@
+from typing import Protocol
+
+class User:
+    def __init__(self, name: str, email: str):
+        self.name = name
+        self.email = email
+
+class EmailValidator(Protocol):
+    def validate(self, email: str) -> bool:
+        ...
+
+class SimpleEmailValidator:
+    def validate(self, email: str) -> bool:
+        return '@' in email
+
+class EmailSender(Protocol):
+    def send(self, to: str, subject: str, body: str) -> None:
+        ...
+
+class ConsoleEmailSender:
+    def send(self, to: str, subject: str, body: str) -> None:
+        print(f"Отправка письма на {to}: {subject}\n{body}")
+
+class UserService:
+    def __init__(
+        self,
+        validator: EmailValidator,
+        sender: EmailSender
+    ):
+        self._validator = validator
+        self._sender = sender
+
+    def create_user_and_send_welcome(self, name: str, email: str) -> User:
+        if not self._validator.validate(email):
+            raise ValueError(f"Некорректный email: {email}")
+
+        user = User(name, email)
+
+        self._sender.send(
+            to=email,
+            subject="Добро пожаловать!",
+            body=f"Добро пожаловать, {name}!"
+        )
+
+        return user
+
+if __name__ == "__main__":
+    validator = SimpleEmailValidator()
+    sender = ConsoleEmailSender()
+    user_service = UserService(validator, sender)
+
+    try:
+        user = user_service.create_user_and_send_welcome("Алексей", "alex@example.com")
+        print(f"Пользователь создан: {user.name}")
+    except ValueError as e:
+        print(f"Ошибка: {e}")
