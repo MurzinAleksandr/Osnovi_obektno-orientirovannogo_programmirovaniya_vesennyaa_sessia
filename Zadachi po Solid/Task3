@@ -1,0 +1,30 @@
+from abc import ABC, abstractmethod
+
+class Bird(ABC):
+    @abstractmethod
+    def move(self) -> str:
+        pass
+
+class Flyable(ABC):
+    @abstractmethod
+    def fly(self) -> str:
+        pass
+
+class Sparrow(Bird, Flyable):
+    def move(self) -> str:
+        return self.fly()
+
+    def fly(self) -> str:
+        return "Воробей летит"
+
+class Penguin(Bird):
+    def move(self) -> str:
+        return "Пингвин идёт вперевалочку"
+
+def make_birds_move(birds: list[Bird]):
+    for bird in birds:
+        print(bird.move())
+
+if __name__ == "__main__":
+    birds = [Sparrow(), Penguin()]
+    make_birds_move(birds)
