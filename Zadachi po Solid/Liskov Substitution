@@ -1,0 +1,54 @@
+from abc import ABC, abstractmethod
+
+class Shape(ABC):
+    @abstractmethod
+    def area(self) -> int:
+        pass
+
+class Rectangle(Shape):
+    def __init__(self, w: int, h: int):
+        self._w = w
+        self._h = h
+
+    @property
+    def width(self) -> int:
+        return self._w
+
+    @width.setter
+    def width(self, v: int) -> None:
+        self._w = v
+
+    @property
+    def height(self) -> int:
+        return self._h
+
+    @height.setter
+    def height(self, v: int) -> None:
+        self._h = v
+
+    def area(self) -> int:
+        return self._w * self._h
+
+class Square(Shape):
+    def __init__(self, side: int):
+        self._side = side
+
+    @property
+    def side(self) -> int:
+        return self._side
+
+    @side.setter
+    def side(self, v: int) -> None:
+        self._side = v
+
+    def area(self) -> int:
+        return self._side ** 2
+
+def resize_and_get_area(shape: Shape) -> int:
+    
+    if isinstance(shape, Rectangle):
+        shape.width = 10
+        shape.height = 5
+    elif isinstance(shape, Square):
+        shape.side = 7
+    return shape.area()
