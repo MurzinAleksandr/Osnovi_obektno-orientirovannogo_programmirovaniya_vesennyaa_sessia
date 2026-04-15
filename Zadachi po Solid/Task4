@@ -1,0 +1,68 @@
+from abc import ABC, abstractmethod
+
+class Printable(ABC):
+    @abstractmethod
+    def print_doc(self, document: str) -> None:
+        pass
+
+class Scannable(ABC):
+    @abstractmethod
+    def scan_doc(self, document: str) -> None:
+        pass
+
+class Faxable(ABC):
+    @abstractmethod
+    def send_fax(self, document: str) -> None:
+        pass
+
+class SimplePrinter(Printable):
+    def print_doc(self, document: str) -> None:
+        print(f"Печать: {document}")
+
+class ScannerDevice(Scannable):
+    def scan_doc(self, document: str) -> None:
+        print(f"Сканирование: {document}")
+
+class FaxMachine(Faxable):
+    def send_fax(self, document: str) -> None:
+        print(f"Отправка факса: {document}")
+
+class AdvancedPrinter(Printable, Scannable, Faxable):
+    def print_doc(self, document: str) -> None:
+        print(f"Печать: {document}")
+
+    def scan_doc(self, document: str) -> None:
+        print(f"Сканирование: {document}")
+
+    def send_fax(self, document: str) -> None:
+        print(f"Отправка факса: {document}")
+
+def use_printer(printer: Printable) -> None:
+    printer.print_doc("Договор.pdf")
+
+def use_scanner(scanner: Scannable) -> None:
+    scanner.scan_doc("Документ.pdf")
+
+def use_fax(fax_machine: Faxable) -> None:
+    fax_machine.send_fax("Счёт.pdf")
+
+if __name__ == "__main__":
+    print("=== ТЕСТИРОВАНИЕ УСТРОЙСТВ ===")
+
+    print("\n1. Тест SimplePrinter:")
+    simple_printer = SimplePrinter()
+    use_printer(simple_printer)
+
+    print("\n2. Тест сканера:")
+    scanner = ScannerDevice()
+    use_scanner(scanner)
+
+    print("\n3. Тест факса:")
+    fax = FaxMachine()
+    use_fax(fax)
+
+    print("\n4. Тест многофункционального устройства:")
+    advanced = AdvancedPrinter()
+    use_printer(advanced)
+    use_scanner(advanced)
+    use_fax(advanced)
