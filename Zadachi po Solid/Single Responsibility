@@ -1,0 +1,100 @@
+import json
+from dataclasses import dataclass
+from typing import List, Protocol
+
+@dataclass
+class Order:
+    id: str
+    price: float
+    qty: int
+    customer_email: str
+
+class NotificationSender(Protocol):
+    def send(self, to: str, subject: str, body: str) -> None:
+        ...
+
+class OrderLoader:
+    def load_from_json(self, json_path: str) -> List[dict]:"
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Файл {json_path} не найден")
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Ошибка парсинга JSON: {e}")
+
+class OrderValidator:
+    @staticmethod
+    def validate(self, item: dict) -> None:
+        required_fields = ["id", "price", "qty", "email"]
+        for field in required_fields:
+            if field not in item:
+                raise ValueError(f"Отсутствует поле: {field}")
+        if item["qty"] <= 0:
+            raise ValueError("qty must be positive")
+
+class OrderParser:
+    def __init__(self, validator: OrderValidator):
+        self._validator = validator
+
+    def parse(self, raw_data: List[dict]) -> List[Order]:
+        orders = []
+        for item in raw_data:
+            self._validator.validate(item)
+            orders.append(Order(
+                item["id"],
+                float(item["price"]),
+                int(item["qty"]),
+                item["email"]
+            ))
+        return orders
+
+class OrderCalculator:
+    def calculate_total(self, orders: List[Order]) -> float:
+        return sum(o.price * o.qty for o in orders)
+
+    def get_orders_count(self, orders: List[Order]) -> int:
+        return len(orders)
+
+class ReportFormatter:
+    def format(self, orders_count: int, total: float) -> str:
+        return f"Orders count: {orders_count}\nTotal: {total:.2f}\n"
+
+class EmailSender:
+    def send(self, to: str, subject: str, body: str) -> None:
+        print(f"[EMAIL to={to}] {subject}\n{body}")
+
+class NoOpEmailSender:
+    def send(self, to: str, subject: str, body: str) -> None:
+        pass
+
+class OrderReportService:
+    def __init__(
+        self,
+        loader: OrderLoader,
+        parser: OrderParser,
+        calculator: OrderCalculator,
+        formatter: ReportFormatter,
+        sender: NotificationSender
+    ):
+        self._loader = loader
+        self._parser = parser
+        self._calculator = calculator
+        self._formatter = formatter
+        self._sender = sender
+
+    def make_and_send_report(self, json_path: str) -> str:
+        raw_data = self._loader.load_from_json(json_path)
+
+        orders = self._parser.parse(raw_data)
+
+        total = self._calculator.calculate_total(orders)
+        orders_count = self._calculator.get_orders_count(orders)
+
+        report = self._formatter.format(orders_count, total)
+
+        emails = set(o.customer_email for o in orders)
+        for email in emails:
+            self._sender.send(email, "Your order report", report)
+
+        return report
