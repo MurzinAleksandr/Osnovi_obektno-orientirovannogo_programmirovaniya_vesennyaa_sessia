@@ -1,0 +1,141 @@
+from dataclasses import dataclass, field
+import json
+
+@dataclass
+class HttpRequest:
+    method: str
+    url: str
+    headers: dict[str, str] = field(default_factory=dict)
+    body: str = ""
+    timeout: int = 30
+
+    def __str__(self) -> str:
+        return (
+            f"{self.method} {self.url}\n"
+            f"Headers: {self.headers}\n"
+            f"Body: {self.body[:50]}...\n"
+            f"Timeout: {self.timeout}s"
+        )
+
+class HttpRequestBuilder:
+    def __init__(self):
+        self._method = None
+        self._url = None
+        self._headers = {}
+        self._body = ""
+        self._timeout = 30
+
+    def set_method(self, method: str):
+        self._method = method.upper()
+        return self
+
+    def set_url(self, url: str):
+        self._url = url
+        return self
+
+    def add_header(self, key: str, value: str):
+        self._headers[key] = value
+        return self
+
+    def set_body(self, body: str):
+        self._body = body
+        return self
+
+    def set_timeout(self, timeout: int):
+        self._timeout = timeout
+        return self
+
+    def build(self) -> HttpRequest:
+        if not self._method:
+            raise ValueError("Метод запроса не установлен")
+        if not self._url:
+            raise ValueError("URL запроса не установлен")
+
+        return HttpRequest(
+            method=self._method,
+            url=self._url,
+            headers=self._headers.copy(),
+            body=self._body,
+            timeout=self._timeout
+        )
+
+class Director:
+    def __init__(self, builder: HttpRequestBuilder):
+        self._builder = builder
+
+    def build_json_post(self, url: str, data: dict) -> HttpRequest:
+        body = json.dumps(data)
+        return (self._builder
+                .set_method("POST")
+                .set_url(url)
+                .add_header("Content-Type", "application/json")
+                .add_header("Accept", "application/json")
+                .set_body(body)
+                .set_timeout(60)
+                .build())
+
+    def build_auth_get(self, url: str, token: str) -> HttpRequest:
+        return (self._builder
+                .set_method("GET")
+                .set_url(url)
+                .add_header("Authorization", f"Bearer {token}")
+                .add_header("Accept", "application/json")
+                .set_timeout(30)
+                .build())
+
+    def build_multipart_upload(self, url: str, filename: str) -> HttpRequest:
+        boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW"
+
+        body = (
+            f"--{boundary}\r\n"
+            f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'
+            f"Content-Type: application/octet-stream\r\n\r\n"
+            "FILE_CONTENTS_HERE\r\n"
+            f"--{boundary}--\r\n"
+        )
+
+        return (self._builder
+                .set_method("POST")
+                .set_url(url)
+                .add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
+                .add_header("Accept", "*/*")
+                .set_body(body)
+                .set_timeout(120)
+                .build())
+
+if __name__ == "__main__":
+    builder = HttpRequestBuilder()
+    request1 = (builder
+               .set_method("GET")
+               .set_url("https://api.example.com/users")
+               .add_header("User-Agent", "MyApp/1.0")
+               .add_header("Accept", "application/json")
+               .set_timeout(45)
+               .build())
+    print("=== ПОШАГОВОЕ СОЗДАНИЕ ЗАПРОСА ===")
+    print(request1)
+    print()
+
+    director = Director(HttpRequestBuilder())
+    request2 = director.build_json_post(
+        "https://api.example.com/orders",
+        {"item": "book", "quantity": 2}
+    )
+    print("=== JSON POST ЧЕРЕЗ DIRECTOR ===")
+    print(request2)
+    print()
+
+    request3 = director.build_auth_get(
+        "https://api.example.com/profile",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    )
+    print("=== AUTH GET ЧЕРЕЗ DIRECTOR ===")
+    print(request3)
+    print()
+
+    request4 = director.build_multipart_upload(
+        "https://api.example.com/upload",
+        "document.pdf"
+    )
+    print("=== MULTIPART UPLOAD ЧЕРЕЗ DIRECTOR ===")
+    print(request4)
